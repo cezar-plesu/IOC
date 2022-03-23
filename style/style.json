@@ -1,0 +1,135 @@
+{
+  "mainWindow": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#151729"
+      }
+    ]
+  },
+  "songFrame": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#FECE82"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      },
+      {
+        "name": "color",
+        "value": "#151729"
+      }
+    ],   "hover": [
+      
+    ],
+    "pressed": [
+      {
+        "name": "background-color",
+        "value": "#DD8700"
+      },
+	  {
+        "name": "border-radius",
+        "value": "10px"
+      },
+      {
+        "name": "color",
+        "value": "#373C60"
+      }
+    ]
+  },
+  "songFramePlaylist": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#373C60 "
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      },
+      {
+        "name": "color",
+        "value": "#DD8700"
+      }
+    ],
+    "pressed": [
+      {
+        "name": "background-color",
+        "value": "#151729"
+      },
+	  {
+        "name": "border-radius",
+        "value": "10px"
+      },
+      {
+        "name": "color",
+        "value": "#FECE82"
+      }
+    ]
+  },
+  "musicFrame": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#FFBB50"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      }
+    ]
+  },
+  "playFrame": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#24273F"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      },
+      {
+        "name": "color",
+        "value": "#FFFFFF"
+      }
+    ]
+  },
+  "bluetooth": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#373C60"
+      },
+      {
+        "name": "border-radius",
+        "value": "17px"
+      }
+    ]
+  },
+  "simpleIco":
+  {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "rgba(255, 255, 255, 0)"
+      }
+    ]
+  },
+  "warning":
+  {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "rgba(255, 255, 255, 0)"
+      },
+      {
+        "name": "color",
+        "value": "#B00020"
+      }
+    ]
+  }
+  
+}

@@ -1,0 +1,120 @@
+{
+  "mainWindow": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#2196F3"
+      }
+    ]
+  },
+  "songFrame": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#0D47A1"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      }
+    ],
+    "hover": [
+      
+    ],
+    "pressed": [
+      {
+        "name": "background-color",
+        "value": "#82B1FF"
+      },
+	  {
+        "name": "border-radius",
+        "value": "10px"
+      }
+    ]
+  },
+  "songFramePlaylist": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#2E7D32"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      }
+    ],
+    "pressed": [
+      {
+        "name": "background-color",
+        "value": "#A5D6A7"
+      },
+	  {
+        "name": "border-radius",
+        "value": "10px"
+      }
+    ]
+  },
+  "musicFrame": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#4CAF50"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      }
+    ]
+  },
+  "playFrame": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#1B5E20"
+      },
+      {
+        "name": "border-radius",
+        "value": "10px"
+      },
+      {
+        "name": "color",
+        "value": "#FFFFFF"
+      }
+    ]
+  },
+  "bluetooth": {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "#2979FF"
+      },
+      {
+        "name": "border-radius",
+        "value": "17px"
+      }
+    ]
+  },
+  "simpleIco":
+  {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "rgba(255, 255, 255, 0)"
+      }
+    ]
+  },
+  "warning":
+  {
+    "default": [
+      {
+        "name": "background-color",
+        "value": "rgba(255, 255, 255, 0)"
+      },
+      {
+        "name": "color",
+        "value": "#B00020"
+      }
+    ]
+  }
+  
+}
