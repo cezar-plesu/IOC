@@ -55,6 +55,9 @@ class MusicItem(QPushButton):
     def getPath(self):
         return self.fileName
 
+    def setPath(self,path):
+        self.fileName = path
+
     def setName(self, name):
         self.name = name
         print(self.name)

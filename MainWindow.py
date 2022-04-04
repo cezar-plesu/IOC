@@ -1,9 +1,11 @@
+import glob
 import json
+import os
 import sys
 import importlib
 import threading
 from os import environ
-
+import speech_recognition as sr
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QFileDialog, QFrame, QWidget, QVBoxLayout, \
     QSpacerItem, QSizePolicy, QScrollArea, QLayout, QMainWindow, QHBoxLayout
@@ -14,6 +16,8 @@ from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
 from buttons import Buttons
 from buttons_function.cameraModule import CameraModule
+from buttons_function.microphone import MicrophoneFunc
+from buttons_function.searchFrame import SearchFrame
 from buttons_function.volumeManager import VolumeManager
 from musicItem import MusicItem
 from playListFrame import PlayListFrame
@@ -31,8 +35,16 @@ class MainWindow(QMainWindow):
         # referinte la functii
         playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\intro.wav",False)
 
+        self.microphone = MicrophoneFunc()
         self.volumeManager = VolumeManager()
-        print(self.volumeManager.volumeOn())
+        self.microphoneTheread = threading.Thread(target=self.speech2text)
+        self.wasStartMicro = False
+        self.speechRecord = ""
+        self.vocalList = []
+        self.wrongCommand = False
+        self.repeatQuestions = True
+
+        # print(self.volumeManager.volumeOn())
 
         # self.cameraModule = CameraModule(0)
         # print(self.cameraModule.getStatus())
@@ -62,6 +74,7 @@ class MainWindow(QMainWindow):
         self.buttonTrash = Buttons(self.centralWidget, "trash.svg", 41, 41)
         self.buttonAddMusic = Buttons(self.centralWidget, "add_music.svg", 41, 41)
 
+        self.searchFrame = SearchFrame(self.centralWidget)
 
         if self.mode == "dayStyle":
             self.themeChangeButton = Buttons(self.centralWidget, "moon.svg", 41, 41, "sun.svg")
@@ -76,7 +89,7 @@ class MainWindow(QMainWindow):
         self.scrollAreaWidgetContents = QWidget()
         self.verticalLayout = QHBoxLayout(self.scrollAreaWidgetContents)
         self.spacerItem = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.once = True
+        self.once = False
 
 
         self.setupUI()
@@ -87,6 +100,7 @@ class MainWindow(QMainWindow):
         # print(self.theme["songFramePlaylist"]["default"])
 
         # print(self.json2style(self.theme["songFramePlaylist"]["default"]))
+
 
         self.setFixedSize(QSize(1256, 681))
         # self.setStyleSheet(self.json2style(self.theme[self.objectName()]["default"]))
@@ -130,6 +144,10 @@ class MainWindow(QMainWindow):
         self.json2style(self.playListFrame, "default")
         self.playListFrame.setGeometry(QRect(103, 182, 1040, 393))
 
+        self.searchFrame.setStyleSheet("background-color: #C4C4C4; border-radius: 25px;")
+        self.searchFrame.setGeometry(QRect(267, 29, 659, 50))
+        self.searchFrame.hide()
+
         # actiuni butoane
         self.buttonAddMusic.click_signal.connect(lambda: self.addMusicPath())
         self.playListFrame.clickAdd().click_signal.connect(lambda: self.window2playList())
@@ -137,6 +155,9 @@ class MainWindow(QMainWindow):
         self.buttonSound.click_signal.connect(lambda: self.setVolume())
         self.buttonCamera.click_signal.connect(lambda: self.camera())
         self.buttonTrash.click_signal.connect(lambda: self.removeItem())
+
+        self.buttonMicrophone.click_signal.connect(lambda: self.microphoneFunc())
+
         # scoll Areea
         self.attachmentScrollArea.setEnabled(True)
         self.attachmentScrollArea.setGeometry(QRect(106, 97, 1037, 68))
@@ -160,20 +181,23 @@ class MainWindow(QMainWindow):
         self.verticalLayout.setSpacing(10)
 
         self.attachmentScrollArea.setWidget(self.scrollAreaWidgetContents)
-        #####################
+
+
+
+        ##################### probleme      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         # path = 'D:/SEM_2/IOC/proiect/music/'
         # files = os.listdir(path)
-        # for filename in glob.glob(os.path.join(path, '*.wav')):
+        # for filename in glob.glob(os.path.join(path, '*.mp3')):
         #     print(filename)
-        #     musicName = filename.split("\\")[-1]
-        #     print(musicName)
-        #     musicName = musicName.split(".")[0]
+        #     musicPath = filename.split("\\")[-1]
+        #
+        #     filename = filename.replace("\\","/")
+        #     musicName = musicPath.split(".")[0]
         #     if musicName != "":
         #         self.verticalLayout.removeItem(self.spacerItem)
         #
-        #         print("got here")
-        #         music = MusicItem(self.centralWidget, musicName, self.theme, False)
+        #         music = MusicItem(self.centralWidget, filename, self.theme, False)
         #
         #         self.json2style(music, "default")
         #         music.setMinimumSize(133, 62)
@@ -181,13 +205,132 @@ class MainWindow(QMainWindow):
         #         music.click_signal.connect(lambda isPressed: self.selectedMusic(music, isPressed))
         #         self.verticalLayout.addWidget(music)
         #         self.verticalLayout.addSpacerItem(self.spacerItem)
+        #
+        #         self.vocalList.append(music)
+
+
+    def microphoneFunc(self):
+        if self.buttonMicrophone.isOn():
+            self.quitFlag = True
+            if self.wasStartMicro:
+                self.microphoneTheread.join()
+            else:
+                self.microphoneTheread.start()
+            self.searchFrame.show()
+
+            self.wasStartMicro = True
+
+        else:
+            self.quitFlag = False
+            self.microphone.forceStop()
+            self.microphoneTheread.join()
+
+            self.searchFrame.hide()
+
+
+
+    def speech2text(self):
+        recognizer = sr.Recognizer()
+        microphone = sr.Microphone()
+        action = 'Listening'
+        print(action)
+
+        while (self.quitFlag):
+            text = self.microphone.speechToText(recognizer, microphone)
+
+            if not text["success"] and text["error"] == "API unavailable":
+                print("ERROR: {}\nclose program".format(text["error"]))
+                break
+            while not text["success"] and self.microphone.getSiri():
+                print(f"siri will be fall asleep in {55 - self.microphone.checkSiri()} seconds\n")
+                if not self.microphone.getSiri():
+                    self.searchFrame.setText("Say 'Hey Siri' to start vocal control")
+                text = self.microphone.speechToText(recognizer, microphone)
+            try:
+                if (text["transcription"].lower() == "exit"):
+                    self.quitFlag = False
+
+
+                print(text["transcription"].lower())
+                self.speechRecord = text["transcription"].lower()
+
+
+                if self.microphone.getSiri():
+
+                    self.searchFrame.setText(self.speechRecord)
+                    # if self.speechRecord.split(" ")[0] in self.microphone.getCommands():
+
+                    # self.playListFrame.createSong()
+                    self.wrongCommand = self.microphone.isProblem(self.speechRecord,self.once)
+
+                    if not self.wrongCommand:
+                        find = False
+                        # switched functions
+                        if self.speechRecord.split(" ")[0] == "play":
+                            musicName = self.speechRecord[len(self.speechRecord.split(" ")[0])+1:]
+                            print("*********" + musicName)
+
+                            for music in self.vocalList:
+                                if musicName == music.getName().lower():
+                                    self.playListFrame.playItNow(music)
+                                    find = True
+                                    break
+                            if not find:
+                                musicName = self.speechRecord.split(" ")[1]
+                                self.microphone.textToSpeech(f"Music {musicName} not found.")
+                        if self.speechRecord.split(" ")[0] == "stop":
+                            self.playListFrame.stop()
+
+                        if self.speechRecord.split(" ")[0] == "next":
+                            self.playListFrame.musicNext()
+
+                        if self.speechRecord.split(" ")[0] == "add":
+                            musicName = self.speechRecord.split(" ")[2]
+                            for music in self.vocalList:
+                                if musicName == music.getName().lower():
+                                    self.playListFrame.createSong(music)
+                                    find = True
+                                    break
+                            if not find:
+                                self.microphone.textToSpeech(f"Music {musicName} not found.")
+
+                            # self.playListFrame.createSong(music)
+
+                    else:
+                        if self.once:
+                            while self.repeatQuestions:
+                                text = self.microphone.speechToText(recognizer, microphone)
+                                textResponse = text["transcription"].lower()
+                                if self.microphone.waitResponse(textResponse) == 0:
+                                    self.repeatQuestions = True
+                                else:
+                                    self.repeatQuestions = False
+                                    # fac alegere da sau nu
+                                    if self.microphone.waitResponse(textResponse) == 1:
+                                        self.microphone.textToSpeech("Ok. If you want to see instructions say Help")
+                                    print("your response "+textResponse)
+                            self.once = False
+
+
+                if text["transcription"].lower() =="hey siri":
+                    self.microphone.enableSiri()
+                    self.searchFrame.setText("...")
+
+                    # self.microphone.textToSpeech("Hey, I'm Siri. What can I help you")
+            except:
+                pass
+
+        print("finished")
+
+
+
     def swapTheme(self):
         f = open("style/curentTheme.txt", "w")
 
         print(self.mode)
         if self.mode == "style":
             f.write("dayStyle")
-            print("ok")
+            # print("ok")
         else:
             f.write("style")
 
@@ -195,22 +338,28 @@ class MainWindow(QMainWindow):
 
         importlib.reload(self)
 
+    ########################################### camera functions
+    def mouseMoveEvent(self, a0: QMouseEvent) -> None:
+        p = a0.pos()
+        print(p)
 
     def camera(self):
         self.cameraModule = CameraModule(0)
-        print(self.buttonCamera.isOn())
+        # print(self.buttonCamera.isOn())
         if self.buttonCamera.isOn():
             if not self.cameraModule.getStatus():
                 self.buttonCamera.set2close()
 
-                playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\camera_error.wav")
+                # playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\camera_error.wav")
 
             else:
+
                 self.buttonCamera.setWarningSound(None)
                 self.buttonCamera.set2open()
         else:
             self.buttonCamera.set2close()
 
+    ###########################################
     def setVolume(self):
         self.volumeManager.setVolume()
 
@@ -227,6 +376,7 @@ class MainWindow(QMainWindow):
 
         musicName = fname[0].split("/")[-1]
         musicName = musicName.split(".")[0]
+        print(fileName)
         if musicName != "":
             self.verticalLayout.removeItem(self.spacerItem)
 
@@ -240,11 +390,19 @@ class MainWindow(QMainWindow):
             self.verticalLayout.addWidget(music)
             self.verticalLayout.addSpacerItem(self.spacerItem)
 
+            self.vocalList.append(music)
 
-            print("ok")
+            # print("ok")
             # threading.Thread(target=playsound, args=("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.wav",)).start()
 
-            playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.wav")
+            try:
+                # threading.Thread(target=playsound, args=("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.wav",)).start()
+                mixer.init()
+                mixer.music.load("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.mp4")
+                mixer.music.play()
+            except:
+                pass
+
 
     def removeItem(self):
         try:
@@ -278,7 +436,10 @@ class MainWindow(QMainWindow):
     def window2playList(self):
         if self.musicActiveList:
             # threading.Thread(target=playsound, args=("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.wav",)).start()
-            playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.wav")
+            try:
+                playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\success_load.wav")
+            except:
+                pass
         else:
             # threading.Thread(target=playsound, args=("D:\\SEM_2\\IOC\\proiect\\buttonSound\\error-sound.wav",)).start()
             playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\error-sound.wav")

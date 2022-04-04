@@ -90,21 +90,31 @@ class PlayListFrame(QFrame):
             self.errorMessage.hide()
 
     def musicNext(self):
-        self.playMusicFrame.setPath("")
-        self.playMusicFrame.setName("")
-
         for music in self.musicList:
             if music.getName() != "":
-                musicName = music.getName()
-                self.playMusicFrame.setPath(music.getPath())
-                self.playMusicFrame.setName(musicName)
-
+                self.stop()
+                self.playItNow(music)
                 music.setName("")
                 music.hide()
                 break
             print(music.getPath())
 
+    def stop(self):
+        self.playMusicFrame.getPlayStopButton().set2close()
+        self.playMusicFrame.getPlayStopButton().thread_function()
 
+    def playItNow(self, musicItem):
+        musicName = musicItem.getName()
+        self.playMusicFrame.setPath(musicItem.getPath())
+        self.playMusicFrame.setName(musicName)
+        print("Music was created: " + musicItem.getPath())
+
+
+        print("ok 1")
+
+        self.playMusicFrame.getPlayStopButton().set2open()
+        print("ok 2")
+        self.playMusicFrame.getPlayStopButton().thread_function()
 
     def createSong(self, musicItem):
         musicName = musicItem.getName()
@@ -116,7 +126,10 @@ class PlayListFrame(QFrame):
         else:
             for music in self.musicList:
                 if music.getName() == "":
+                    # print(musicItem.getPath())
+                    music.setPath(musicItem.getPath())
                     music.setName(musicName)
+
                     music.show()
                     break
 

@@ -37,5 +37,5 @@ class VolumeManager():
                 else:
                     volume.SetMasterVolume(1, None)
                     # print("ON "+ str(volume.GetMasterVolume())+" "+str(self.isOn))
-                    playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\enable.wav")
+                    # playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\enable.wav")
                     self.isOn = True

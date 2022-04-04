@@ -69,13 +69,15 @@ class Buttons(QPushButton):
             # self.error_created = gTTS(text=self.textErr , lang=self.language, slow=False)
             # self.error_created.save(f"D:\\SEM_2\\IOC\\proiect\\buttonSound\\file-error")
             # self.isException = True
-            playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\file-error.wav")
+            # playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\file-error.wav")
+            print("error")
             self.set2close()
 
 
     def set2close(self):
         self.setIcon(self.icon_default)
         self.isActive = False
+
     def set2open(self):
         self.setIcon(self.image_pressed)
         self.isActive = True
@@ -97,8 +99,13 @@ class Buttons(QPushButton):
             self.setIconSize(QSize(self.ico_sie_w, self.ico_sie_h))
             self.setCursor(QCursor(Qt.PointingHandCursor))
 
-
-            playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\enable.wav")
+            try:
+                mixer.init()
+                mixer.music.load("D:\\SEM_2\\IOC\\proiect\\buttonSound\\enable.wav")
+                mixer.music.play()
+            except:
+                pass
+            # playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\enable.wav")
 
             # x = threading.Thread(target=self.thread_function, args=("D:\\SEM_2\\IOC\\proiect\\buttonSound\\enable.wav",))
             # x.start()
@@ -107,13 +114,29 @@ class Buttons(QPushButton):
             self.setIcon(self.icon_default)
             self.setIconSize(QSize(self.ico_sie_w, self.ico_sie_h))
             self.setCursor(QCursor(Qt.PointingHandCursor))
-
-            playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\disable.wav")
+            try:
+                mixer.init()
+                mixer.music.load("D:\\SEM_2\\IOC\\proiect\\buttonSound\\disable.wav")
+                mixer.music.play()
+            except:
+                pass
+            # playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\disable.wav")
 
         elif self.warning_sound is None:
-            playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\click.wav")
+            try:
+                playsound("D:\\SEM_2\\IOC\\proiect\\buttonSound\\click.wav")
+            except:
+                pass
         else:
-            playsound(f"D:\\SEM_2\\IOC\\proiect\\buttonSound\\{self.warning_sound}")
+            print(self.warning_sound)
+            try:
+                mixer.init()
+                mixer.music.load(f"D:\\SEM_2\\IOC\\proiect\\buttonSound\\{self.warning_sound}.wav")
+                mixer.music.play()
+            except:
+                threading.Thread(target=playsound, args=("D:\\SEM_2\\IOC\\proiect\\buttonSound\\error-sound.wav",)).start()
+
+            # playsound(f"D:\\SEM_2\\IOC\\proiect\\buttonSound\\{self.warning_sound}")
 
         # print(self.song)
 
